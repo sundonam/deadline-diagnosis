@@ -170,10 +170,10 @@ table.matrix td.hit { background: var(--accent-soft); border: 2px solid var(--ba
       <div class="book-tag">『마감의 신』 자가점검</div>
       <h1>내 마감을 진단한다</h1>
       <p class="subtitle">나는 어떤 마감 앞에서, 어떻게 무너지는가</p>
-      <p>30개 문항을 읽고 최근 1년 동안 자신에게 실제로 있었던 일인지 점검한다. 결과에서는 내가 주로 맞닥뜨리는 마감의 종류(생존, 협업, 기회, 성장)와 마감 행동 유형(즉시 착수형, 막판 집중형, 완벽 준비형, 회피·망각형)을 확인하고, 그 조합에 맞는 처방을 받는다.</p>
+      <p>먼저 최근 1년 동안 어떤 종류의 마감을 주로 겪었는지 여덟 개 문항으로 확인한다. 이어서 30개 문항으로 마감 앞에서 실제로 있었던 행동을 점검한다. 결과에서는 내가 주로 맞닥뜨리는 마감의 종류(생존, 협업, 기회, 성장)와 마감 행동 유형(즉시 착수형, 막판 집중형, 완벽 준비형, 회피·망각형)을 확인하고, 그 조합에 맞는 처방을 받는다.</p>
       <p>이 점검표는 성격이나 능력을 평가하는 심리검사가 아니다. 네 가지 행동 유형 가운데 어느 하나로 사람을 판정하려는 것도 아니다. 한 사람에게 여러 행동 유형이 함께 나타날 수 있고, 일의 종류에 따라 다른 모습을 보이기도 한다. 여기서 확인하려는 것은 나는 마감 앞에서 어떤 행동을 반복하고, 주로 어느 지점에서 어려움을 겪는가이다.</p>
       <p>바람직해 보이는 답이 아니라 최근 1년 동안 실제로 자신이 어떻게 행동했는지를 기준으로 응답한다. 판단이 애매하다면 구체적인 장면이 떠오르는지를 기준으로 삼으면 된다. 실제 장면이 떠오르면 그만큼 높은 점수를, 그렇지 않다면 낮은 점수를 준다.</p>
-      <p class="note">다섯 묶음(A~E)을 한 화면에 하나씩, 문항마다 5점 척도로 응답한다. 5분이면 충분하다.</p>
+      <p class="note">여섯 화면에 걸쳐 문항마다 5점 척도로 응답한다. 5분이면 충분하다.</p>
       <div class="btn-row">
         <span class="spacer"></span>
         <button class="primary" onclick="app.start()">진단 시작</button>
@@ -204,7 +204,7 @@ table.matrix td.hit { background: var(--accent-soft); border: 2px solid var(--ba
       <hr class="divider">
       <h2>주로 맞닥뜨리는 마감의 종류</h2>
       <div class="chart" id="chart-types"></div>
-      <p class="axis-note">네 종류의 상대 비중이다. 합계는 100%다.</p>
+      <p class="axis-note">최근 1년 동안 겪은 빈도 응답을 기준으로 한 상대 비중이다. 합계는 100%다.</p>
       <div class="dim-desc" id="desc-type"></div>
 
       <h2>마감 행동 유형</h2>
@@ -259,6 +259,23 @@ const SCALE = [
   { v: 4, label: "그렇다" },
   { v: 5, label: "매우 그렇다" }
 ];
+
+/* 마감 환경 설문 — 어떤 종류의 마감을 얼마나 자주 겪는지 직접 묻는다.
+   유형별 2문항이며, 문항 예시는 3장의 유형 설명에서 가져왔다. */
+const ENV_GROUP = {
+  name: "나의 마감 환경",
+  guide: "먼저 최근 1년 동안 어떤 종류의 마감을 얼마나 자주 겪었는지 확인한다. 잘하고 있는지가 아니라 이런 일이 나에게 얼마나 자주 있는지를 기준으로 응답한다.",
+  items: [
+    { type: "survival", text: "시험, 과제, 지원서, 세금이나 행정 신고처럼 기한을 넘기면 즉시 불이익이 생기는 일을 처리한다." },
+    { type: "survival", text: "계약, 납품, 제안서 제출처럼 날짜를 어기면 손실이 발생하는 업무를 맡고 있다." },
+    { type: "collab", text: "내 자료나 결과물을 받아야 다음 일을 시작할 수 있는 동료, 상사, 고객이 있다." },
+    { type: "collab", text: "보고서 검토, 피드백, 원고 전달처럼 다른 사람이 기다리는 일을 한다." },
+    { type: "opportunity", text: "공모, 채용, 자격증 시험, 투고처럼 접수 기간이 정해진 기회에 지원하거나 지원을 검토한다." },
+    { type: "opportunity", text: "관심 있는 공모나 채용, 시험의 일정을 챙겨야 할 일이 있다." },
+    { type: "growth", text: "운동, 공부, 독서처럼 스스로 정한 목표를 진행하고 있다." },
+    { type: "growth", text: "책 쓰기, 포트폴리오, 새로운 기술 학습처럼 정해진 기한이 없는 개인 과제를 갖고 있다." }
+  ]
+};
 
 const GROUPS = [
   {
@@ -493,8 +510,8 @@ const BANDS = [
    채점 로직
    ========================================================== */
 
-function computeResults(answers) {
-  // answers: 길이 30 배열, 값 1~5 (인덱스 0 = 문항 1)
+function computeResults(answers, envAnswers) {
+  // answers: 길이 30 배열(행동 문항, 인덱스 0 = 문항 1), envAnswers: 길이 8 배열(마감 환경 문항), 값 1~5
 
   // 행동 유형: 묶음별 6문항 합 → 강도 (합-6)/24
   const styleIntensity = {};
@@ -505,23 +522,50 @@ function computeResults(answers) {
     styleIntensity[g.style] = (sum - 6) / 24;
   });
 
-  // 마감 종류: 태그된 문항의 강도 평균 mean((응답-1)/4)
-  const typeIntensity = {};
+  // 마감 종류(노출): 환경 문항에서 유형별 강도 평균 mean((응답-1)/4)
+  const exposureIntensity = {};
+  TYPE_ORDER.forEach(t => {
+    const idx = [];
+    ENV_GROUP.items.forEach((it, i) => { if (it.type === t) idx.push(i); });
+    let sum = 0;
+    idx.forEach(i => { sum += (envAnswers[i] - 1) / 4; });
+    exposureIntensity[t] = sum / idx.length;
+  });
+
+  // 문제 신호: 행동 문항 가운데 유형 태그가 붙은 문항의 강도 평균
+  const problemIntensity = {};
   TYPE_ORDER.forEach(t => {
     const items = TYPE_MAP[t];
     let sum = 0;
     items.forEach(n => { sum += (answers[n - 1] - 1) / 4; });
-    typeIntensity[t] = sum / items.length;
+    problemIntensity[t] = sum / items.length;
   });
 
   const stylePct = toPercent(STYLE_ORDER.map(k => styleIntensity[k]));
-  const typePct = toPercent(TYPE_ORDER.map(k => typeIntensity[k]));
+  const typePct = toPercent(TYPE_ORDER.map(k => exposureIntensity[k]));
+
+  // 처방 조합용 마감 종류: 노출과 문제 신호의 곱이 가장 큰 유형.
+  // 한쪽 신호가 전부 0이면 다른 쪽 1위로 대신한다.
+  const combined = TYPE_ORDER.map(k => ({ key: k, intensity: exposureIntensity[k] * problemIntensity[k] }));
+  let comboTypes = topKeys(combined);
+  let comboBasis = "combined";
+  if (!comboTypes.length) {
+    comboTypes = topKeys(TYPE_ORDER.map(k => ({ key: k, intensity: exposureIntensity[k] })));
+    comboBasis = "exposure";
+  }
+  if (!comboTypes.length) {
+    comboTypes = topKeys(TYPE_ORDER.map(k => ({ key: k, intensity: problemIntensity[k] })));
+    comboBasis = "problem";
+  }
 
   const flagged = answers.filter(v => v >= 4).length;
 
   return {
     styles: STYLE_ORDER.map((k, i) => ({ key: k, intensity: styleIntensity[k], pct: stylePct ? stylePct[i] : null })),
-    types: TYPE_ORDER.map((k, i) => ({ key: k, intensity: typeIntensity[k], pct: typePct ? typePct[i] : null })),
+    types: TYPE_ORDER.map((k, i) => ({ key: k, intensity: exposureIntensity[k], pct: typePct ? typePct[i] : null })),
+    problem: TYPE_ORDER.map(k => ({ key: k, intensity: problemIntensity[k] })),
+    comboTypes,
+    comboBasis,
     flagged
   };
 }
@@ -550,9 +594,12 @@ function topKeys(list) {
    화면 제어
    ========================================================== */
 
+const TOTAL_PAGES = GROUPS.length + 1; // 마감 환경 1페이지 + A~E 5페이지
+
 const app = {
-  page: 0,               // 현재 묶음 인덱스 0~4
+  page: 0,               // 0 = 마감 환경, 1~5 = A~E 묶음
   answers: new Array(30).fill(0),
+  envAnswers: new Array(8).fill(0),
 
   start() {
     this.page = 0;
@@ -562,6 +609,7 @@ const app = {
 
   restart() {
     this.answers.fill(0);
+    this.envAnswers.fill(0);
     this.page = 0;
     this.showScreen("intro");
     window.scrollTo(0, 0);
@@ -573,27 +621,45 @@ const app = {
   },
 
   renderPage() {
-    const g = GROUPS[this.page];
     const body = document.getElementById("quiz-body");
-    let html = `<div class="group-name">${g.name}</div>`;
-    g.items.forEach((text, i) => {
-      const qn = this.page * 6 + i + 1;
-      html += `<div class="q-item">
-        <p class="q-text"><span class="q-num">${qn}.</span>${text}</p>
-        <div class="scale" role="radiogroup" aria-label="문항 ${qn}">`;
-      SCALE.forEach(s => {
-        const checked = this.answers[qn - 1] === s.v ? "checked" : "";
-        html += `<label><input type="radio" name="q${qn}" value="${s.v}" ${checked}
-          onchange="app.setAnswer(${qn}, ${s.v})"><span class="n">${s.v}</span>${s.label}</label>`;
+    let html = "";
+
+    if (this.page === 0) {
+      html += `<div class="group-name">${ENV_GROUP.name}</div>`;
+      html += `<p class="note" style="margin-bottom:4px;">${ENV_GROUP.guide}</p>`;
+      ENV_GROUP.items.forEach((item, i) => {
+        html += `<div class="q-item">
+          <p class="q-text"><span class="q-num">${i + 1}.</span>${item.text}</p>
+          <div class="scale" role="radiogroup" aria-label="환경 문항 ${i + 1}">`;
+        SCALE.forEach(s => {
+          const checked = this.envAnswers[i] === s.v ? "checked" : "";
+          html += `<label><input type="radio" name="e${i}" value="${s.v}" ${checked}
+            onchange="app.setEnvAnswer(${i}, ${s.v})"><span class="n">${s.v}</span>${s.label}</label>`;
+        });
+        html += `</div></div>`;
       });
-      html += `</div></div>`;
-    });
+    } else {
+      const g = GROUPS[this.page - 1];
+      html += `<div class="group-name">${g.name}</div>`;
+      g.items.forEach((text, i) => {
+        const qn = (this.page - 1) * 6 + i + 1;
+        html += `<div class="q-item">
+          <p class="q-text"><span class="q-num">${qn}.</span>${text}</p>
+          <div class="scale" role="radiogroup" aria-label="문항 ${qn}">`;
+        SCALE.forEach(s => {
+          const checked = this.answers[qn - 1] === s.v ? "checked" : "";
+          html += `<label><input type="radio" name="q${qn}" value="${s.v}" ${checked}
+            onchange="app.setAnswer(${qn}, ${s.v})"><span class="n">${s.v}</span>${s.label}</label>`;
+        });
+        html += `</div></div>`;
+      });
+    }
     body.innerHTML = html;
 
-    document.getElementById("progress-fill").style.width = ((this.page + 1) / GROUPS.length * 100) + "%";
-    document.getElementById("progress-label").textContent = (this.page + 1) + " / " + GROUPS.length;
+    document.getElementById("progress-fill").style.width = ((this.page + 1) / TOTAL_PAGES * 100) + "%";
+    document.getElementById("progress-label").textContent = (this.page + 1) + " / " + TOTAL_PAGES;
     document.getElementById("btn-prev").style.visibility = this.page === 0 ? "hidden" : "visible";
-    document.getElementById("btn-next").textContent = this.page === GROUPS.length - 1 ? "결과 보기" : "다음";
+    document.getElementById("btn-next").textContent = this.page === TOTAL_PAGES - 1 ? "결과 보기" : "다음";
     document.getElementById("quiz-warn").style.display = "none";
     window.scrollTo(0, 0);
   },
@@ -603,9 +669,17 @@ const app = {
     document.getElementById("quiz-warn").style.display = "none";
   },
 
+  setEnvAnswer(i, v) {
+    this.envAnswers[i] = v;
+    document.getElementById("quiz-warn").style.display = "none";
+  },
+
   pageComplete() {
+    if (this.page === 0) {
+      return this.envAnswers.every(v => v > 0);
+    }
     for (let i = 0; i < 6; i++) {
-      if (!this.answers[this.page * 6 + i]) return false;
+      if (!this.answers[(this.page - 1) * 6 + i]) return false;
     }
     return true;
   },
@@ -619,7 +693,7 @@ const app = {
       document.getElementById("quiz-warn").style.display = "block";
       return;
     }
-    if (this.page < GROUPS.length - 1) {
+    if (this.page < TOTAL_PAGES - 1) {
       this.page++;
       this.renderPage();
     } else {
@@ -628,37 +702,53 @@ const app = {
   },
 
   showResults() {
-    const r = computeResults(this.answers);
+    const r = computeResults(this.answers, this.envAnswers);
     const topStyles = topKeys(r.styles);
-    const topTypes = topKeys(r.types);
+    const topExposure = topKeys(r.types);
+    const topProblem = topKeys(r.problem);
 
-    // 헤드라인
+    // 헤드라인: 주로 겪는 마감(노출)과 행동 유형
     const headline = document.getElementById("result-headline");
-    if (topTypes.length === 0 && topStyles.length === 0) {
+    if (topExposure.length === 0 && topStyles.length === 0) {
       headline.textContent = "응답에서 뚜렷한 패턴이 나타나지 않는다. 현재 마감 관리가 안정적이라는 신호일 수 있다.";
     } else {
-      const t = topTypes.length ? topTypes.map(k => TYPES[k].name).join(", ") : "특정하기 어려움";
+      const t = topExposure.length ? topExposure.map(k => TYPES[k].name).join(", ") : "특정하기 어려움";
       const s = topStyles.length ? topStyles.map(k => STYLES[k].name).join(", ") : "특정하기 어려움";
-      headline.textContent = `주로 ${t} 앞에서, ${s}의 방식으로 어려움을 겪고 있다.`;
+      headline.textContent = `주로 ${t}을 겪으며, 마감 앞에서는 ${s}의 방식으로 움직인다.`;
     }
 
     // 막대 그래프
-    renderBars("chart-types", r.types, TYPES, topTypes);
+    renderBars("chart-types", r.types, TYPES, topExposure);
     renderBars("chart-styles", r.styles, STYLES, topStyles);
 
-    // 1위 설명
-    document.getElementById("desc-type").innerHTML = topTypes.length
-      ? topTypes.map(k => `<strong>${TYPES[k].name}.</strong> ${TYPES[k].short}`).join("<br>")
-      : "네 종류 모두 뚜렷한 신호가 없다. 지금은 특정 마감에서 반복되는 문제가 크지 않은 상태다.";
+    // 마감 종류 설명: 노출 1위 + 문제 신호 병기
+    let typeDesc;
+    if (topExposure.length) {
+      typeDesc = topExposure.map(k => `<strong>${TYPES[k].name}.</strong> ${TYPES[k].short}`).join("<br>");
+    } else {
+      typeDesc = "환경 응답에서 자주 겪는 마감이 뚜렷하게 나타나지 않는다.";
+    }
+    if (topProblem.length) {
+      const pNames = topProblem.map(k => TYPES[k].name).join(", ");
+      typeDesc += `<br><strong>문제 신호.</strong> 행동 문항 응답으로 보면 문제 신호가 가장 높은 마감은 ${pNames}이다.`;
+      const overlap = topProblem.some(k => topExposure.includes(k));
+      if (topExposure.length && !overlap) {
+        typeDesc += ` 자주 겪는 마감과 문제가 나타나는 마감이 서로 다르다. 겪는 빈도는 낮아도 문제가 반복되는 마감이 있다는 뜻이므로, 처방에서는 두 신호를 함께 고려한다.`;
+      }
+    } else {
+      typeDesc += `<br><strong>문제 신호.</strong> 행동 문항 응답에서는 특정 마감에 문제가 몰리는 신호가 나타나지 않는다.`;
+    }
+    document.getElementById("desc-type").innerHTML = typeDesc;
+
     document.getElementById("desc-style").innerHTML = topStyles.length
       ? topStyles.map(k => `<strong>${STYLES[k].name}.</strong> ${STYLES[k].short}`).join("<br>")
       : "네 유형 모두 뚜렷한 신호가 없다. 지금은 특정 행동 패턴이 반복되고 있지 않은 상태다.";
 
-    // 처방
-    renderPrescriptions(topTypes, topStyles);
+    // 처방: 노출과 문제 신호를 결합해 선정한 마감 종류 기준
+    renderPrescriptions(r.comboTypes, topStyles, r.comboBasis);
 
     // 16조합 표
-    renderMatrix(topTypes, topStyles);
+    renderMatrix(r.comboTypes, topStyles);
 
     // 전반 상태
     const band = BANDS.find(b => r.flagged <= b.max);
@@ -685,7 +775,7 @@ function renderBars(elId, list, dict, tops) {
     </div>`).join("");
 }
 
-function renderPrescriptions(topTypes, topStyles) {
+function renderPrescriptions(topTypes, topStyles, comboBasis) {
   const listEl = document.getElementById("rx-list");
   const introEl = document.getElementById("rx-intro");
 
@@ -695,11 +785,17 @@ function renderPrescriptions(topTypes, topStyles) {
     return;
   }
 
+  const basisText = {
+    combined: "마감 종류는 자주 겪으면서 문제 신호도 높은 유형을 기준으로 골랐다.",
+    exposure: "문제 신호가 뚜렷하지 않아, 마감 종류는 가장 자주 겪는 유형을 기준으로 골랐다.",
+    problem: "자주 겪는 마감 응답이 낮아, 마감 종류는 문제 신호가 가장 높은 유형을 기준으로 골랐다."
+  }[comboBasis] || "";
+
   const combos = [];
   topTypes.forEach(t => topStyles.forEach(s => combos.push([t, s])));
-  introEl.textContent = combos.length > 1
-    ? "비중이 같은 조합이 여러 개다. 아래 처방을 모두 읽고, 지금 가장 자주 겪는 상황부터 적용한다."
-    : "가장 비중이 높은 마감 종류와 행동 유형의 조합에 대한 처방이다. 2주에서 한 달쯤 적용한 뒤 다시 진단해 변화를 확인한다.";
+  introEl.textContent = (combos.length > 1
+    ? "해당하는 조합이 여러 개다. 아래 처방을 모두 읽고, 지금 가장 자주 겪는 상황부터 적용한다."
+    : "마감 종류와 행동 유형의 조합에 대한 처방이다. 2주에서 한 달쯤 적용한 뒤 다시 진단해 변화를 확인한다.") + " " + basisText;
 
   listEl.innerHTML = combos.map(([t, s]) => {
     const key = t + "-" + s;
@@ -721,12 +817,14 @@ function renderPrescriptions(topTypes, topStyles) {
 (function () {
   const params = new URLSearchParams(location.search);
   if (!params.has("preview")) return;
+  const sampleEnv = [4,3, 5,4, 2,3, 4,5];
   const sample = [5,4,4,3,4,5, 2,2,1,2,3,2, 3,4,2,3,2,3, 4,3,4,2,3,4, 3,4,4,3,3,4];
   window.addEventListener("DOMContentLoaded", () => {
     if (params.get("preview") === "quiz") {
       app.start();
       return;
     }
+    app.envAnswers = sampleEnv.slice();
     app.answers = sample.slice();
     app.showResults();
   });
